@@ -1,0 +1,5 @@
+[
+  {"name": "intro_01", "path": "exercises/intro/intro_01.cpp"},
+  {"name": "intro_02", "path": "exercises/intro/intro_02.cpp"},
+  {"name": "pointers_01", "path": "exercises/pointers/pointers_01.cpp"}
+]
