@@ -9,4 +9,5 @@ Rustlings-style exercises for C++ using:
 
 List exercises:
 ```bash
-./cpp-lings list
+./cpplings list
+```
