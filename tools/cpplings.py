@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
+import sys
 import json
-import os
+import time
 import pathlib
 import subprocess
-import sys
-import time
+import os
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 CONFIG_FILE = ROOT / "exercises.json"
-
-env = os.environ.copy()
-env["ASAN_OPTIONS"] = (
-    "halt_on_error=1:abort_on_error=1:exitcode=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=1"
-)
-env["UBSAN_OPTIONS"] = "halt_on_error=1:print_stacktrace=1:report_error_type=1"
 
 
 def load_exercises():
@@ -26,12 +20,10 @@ def get_targets():
     output = subprocess.check_output(
         ["cmake", "--build", str(BUILD), "--target", "help"], stderr=subprocess.DEVNULL
     ).decode()
-    # lines look like: "... ex01_hello"
     return [
-        line.strip().lstrip(". ")
+        pathlib.Path(line.strip().lstrip(". ")).stem
         for line in output.splitlines()
-        if line.strip().startswith("...")
-        and not line.strip().endswith(".phony")  # skip cmake internals
+        if "exercises/" in line and line.strip().endswith(".o")
     ]
 
 
@@ -45,6 +37,13 @@ def cmake_build(target=None):
     if target:
         cmd += ["--target", target]
     subprocess.check_call(cmd)
+
+
+def run_binary(name):
+    env = os.environ.copy()
+    env["UBSAN_OPTIONS"] = "halt_on_error=1"
+    env["ASAN_OPTIONS"] = "halt_on_error=1"
+    subprocess.check_call([str(BUILD / name)], env=env)
 
 
 def find_exercise(name):
@@ -69,7 +68,7 @@ def run_exercise(name):
     cmake_build(name)
 
     print(f"[+] Running {name}")
-    subprocess.check_call([str(BUILD / name)], env=env)
+    subprocess.check_call([str(BUILD / name)])
 
 
 def verify():
@@ -79,7 +78,7 @@ def verify():
 
         try:
             cmake_build(name)
-            subprocess.check_call([str(BUILD / name)], env=env)
+            subprocess.check_call([str(BUILD / name)])
         except subprocess.CalledProcessError:
             print(f"\n❌ Failed: {name}")
             sys.exit(1)
@@ -109,7 +108,7 @@ def watch(name):
 
             try:
                 cmake_build(name)
-                subprocess.check_call([str(BUILD / name)], env=env)
+                subprocess.check_call([str(BUILD / name)])
                 print("[watch] ✅ pass")
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
@@ -120,24 +119,31 @@ def watch(name):
 def watch_all():
     targets = get_targets()
     mtimes = {}  # name -> last mtime
+    print(targets)
+    current_idx = 0
 
-    while True:
-        for name in targets:
-            # glob for the matching .cpp under exercises/
-            matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
-            if not matches:
-                continue
-            mtime = matches[0].stat().st_mtime
-            if mtimes.get(name) != mtime:
-                mtimes[name] = mtime
-                print("\n[watch] change detected")
+    while current_idx < len(targets):
+        name = targets[current_idx]
+        # glob for the matching .cpp under exercises/
+        matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
+        if not matches:
+            print(name + "does not match any exercise. Skipping")
+            current_idx += 1
+            continue
 
-                try:
-                    cmake_build(name)
-                    subprocess.check_call([str(BUILD / name)])
-                    print("[watch] ✅ pass")
-                except subprocess.CalledProcessError:
-                    print("[watch] ❌ fail")
+        mtime = matches[0].stat().st_mtime
+        if mtimes.get(name) != mtime:
+            mtimes[name] = mtime
+            print("\n[watch] change detected")
+
+            try:
+                print(name)
+                cmake_build(name)
+                run_binary(name)
+                print("[watch] ✅ pass")
+                current_idx += 1
+            except subprocess.CalledProcessError:
+                print("[watch] ❌ fail")
 
         time.sleep(0.4)
 
