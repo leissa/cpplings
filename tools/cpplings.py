@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
-import sys
 import json
-import time
+import os
 import pathlib
 import subprocess
+import sys
+import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 CONFIG_FILE = ROOT / "exercises.json"
+
+env = os.environ.copy()
+env["ASAN_OPTIONS"] = (
+    "halt_on_error=1:abort_on_error=1:exitcode=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=1"
+)
+env["UBSAN_OPTIONS"] = "halt_on_error=1:print_stacktrace=1:report_error_type=1"
 
 
 def load_exercises():
@@ -49,7 +56,7 @@ def run_exercise(name):
     cmake_build(name)
 
     print(f"[+] Running {name}")
-    subprocess.check_call([str(BUILD / name)])
+    subprocess.check_call([str(BUILD / name)], env=env)
 
 
 def verify():
@@ -59,7 +66,7 @@ def verify():
 
         try:
             cmake_build(name)
-            subprocess.check_call([str(BUILD / name)])
+            subprocess.check_call([str(BUILD / name)], env=env)
         except subprocess.CalledProcessError:
             print(f"\n❌ Failed: {name}")
             sys.exit(1)
@@ -89,7 +96,7 @@ def watch(name):
 
             try:
                 cmake_build(name)
-                subprocess.check_call([str(BUILD / name)])
+                subprocess.check_call([str(BUILD / name)], env=env)
                 print("[watch] ✅ pass")
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
