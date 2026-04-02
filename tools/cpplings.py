@@ -22,6 +22,19 @@ def load_exercises():
         return json.load(f)
 
 
+def get_targets():
+    output = subprocess.check_output(
+        ["cmake", "--build", str(BUILD), "--target", "help"], stderr=subprocess.DEVNULL
+    ).decode()
+    # lines look like: "... ex01_hello"
+    return [
+        line.strip().lstrip(". ")
+        for line in output.splitlines()
+        if line.strip().startswith("...")
+        and not line.strip().endswith(".phony")  # skip cmake internals
+    ]
+
+
 def cmake_configure():
     BUILD.mkdir(exist_ok=True)
     subprocess.check_call(["cmake", "-S", str(ROOT), "-B", str(BUILD)])
@@ -104,6 +117,31 @@ def watch(name):
         time.sleep(0.4)
 
 
+def watch_all():
+    targets = get_targets()
+    mtimes = {}  # name -> last mtime
+
+    while True:
+        for name in targets:
+            # glob for the matching .cpp under exercises/
+            matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
+            if not matches:
+                continue
+            mtime = matches[0].stat().st_mtime
+            if mtimes.get(name) != mtime:
+                mtimes[name] = mtime
+                print("\n[watch] change detected")
+
+                try:
+                    cmake_build(name)
+                    subprocess.check_call([str(BUILD / name)])
+                    print("[watch] ✅ pass")
+                except subprocess.CalledProcessError:
+                    print("[watch] ❌ fail")
+
+        time.sleep(0.4)
+
+
 def usage():
     print("usage:")
     print("  cpplings list")
@@ -132,6 +170,10 @@ def main():
         if len(sys.argv) != 3:
             usage()
         watch(sys.argv[2])
+    elif cmd == "watch-all":
+        if len(sys.argv) != 2:
+            usage()
+        watch_all()
     else:
         usage()
 
