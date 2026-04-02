@@ -5,6 +5,7 @@ import time
 import pathlib
 import subprocess
 import os
+from ascii import print_ascii
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
@@ -117,6 +118,8 @@ def watch(name):
 
 
 def watch_all():
+    print_ascii()
+
     targets = get_targets()
     mtimes = {}  # name -> last mtime
     print(targets)
