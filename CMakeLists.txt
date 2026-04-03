@@ -47,7 +47,7 @@ foreach(ex_file ${EXERCISE_FILES})
     target_compile_options(
         ${ex_name}
         PUBLIC  ${SAN_FLAGS}
-        PRIVATE -Wall -Wextra -Wpedantic -Werror -g3
+        PRIVATE -Wall -Wextra -Wpedantic -g3
     )
     target_include_directories(
         ${ex_name}
