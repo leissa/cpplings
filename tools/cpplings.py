@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+import argparse
 import sys
 import json
 import time
@@ -114,8 +116,6 @@ def watch(name):
 
 
 def watch_all():
-    print_ascii()
-
     targets = get_targets()
     mtimes = {}  # name -> last mtime
     print(targets)
@@ -147,42 +147,36 @@ def watch_all():
         time.sleep(0.4)
 
 
-def usage():
-    print("usage:")
-    print("  cpplings list")
-    print("  cpplings run <exercise>")
-    print("  cpplings verify")
-    print("  cpplings watch <exercise>")
-    print("  cpplings watch-all")
-    sys.exit(1)
-
-
 def main():
-    if len(sys.argv) < 2:
-        usage()
+    print_ascii()
 
-    cmd = sys.argv[1]
+    # default behavior: cpplings == cpplings watch-all
+    if len(sys.argv) == 1:
+        sys.argv.append("watch-all")
+
+    parser = argparse.ArgumentParser(prog="cpplings")
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
+    subparsers.add_parser("list", help="List available exercises")
+    run_parser = subparsers.add_parser("run", help="Run a specific exercise")
+    run_parser.add_argument("exercise", help="Exercise name to run")
+    subparsers.add_parser("verify", help="Verify all exercises")
+    watch_parser = subparsers.add_parser("watch", help="Watch a specific exercise")
+    watch_parser.add_argument("exercise", help="Exercise name to watch")
+    subparsers.add_parser("watch-all", help="Watch all exercises (default)")
+    args = parser.parse_args()
+
     cmake_configure()
 
-    if cmd == "list":
+    if args.cmd == "list":
         list_exercises()
-    elif cmd == "run":
-        if len(sys.argv) != 3:
-            usage()
-        run_exercise(sys.argv[2])
-    elif cmd == "verify":
+    elif args.cmd == "run":
+        run_exercise(args.exercise)
+    elif args.cmd == "verify":
         verify()
-    elif cmd == "watch":
-        if len(sys.argv) != 3:
-            usage()
-        watch(sys.argv[2])
-    elif cmd == "watch-all":
-        if len(sys.argv) != 2:
-            usage()
+    elif args.cmd == "watch":
+        watch(args.exercise)
+    elif args.cmd == "watch-all":
         watch_all()
-    else:
-        usage()
-
 
 if __name__ == "__main__":
     main()
