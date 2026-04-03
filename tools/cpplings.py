@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-import json
 import time
 import pathlib
 import subprocess
@@ -12,11 +11,6 @@ from ascii import print_ascii
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 CONFIG_FILE = ROOT / "exercises.json"
-
-
-def load_exercises():
-    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def get_targets():
@@ -58,8 +52,9 @@ def find_exercise(name):
 
 
 def list_exercises():
+    print("== Exercises: ==")
     for ex in get_targets():
-        print(ex["name"])
+        print(ex)
 
 
 def run_exercise(name):
@@ -76,15 +71,14 @@ def run_exercise(name):
 
 
 def verify():
-    for ex in load_exercises():
-        name = ex["name"]
-        print(f"\n== {name} ==")
+    for ex in get_targets():
+        print(f"\n== {ex} ==")
 
         try:
-            cmake_build(name)
-            subprocess.check_call([str(BUILD / name)])
+            cmake_build(ex)
+            subprocess.check_call([str(BUILD / ex)])
         except subprocess.CalledProcessError:
-            print(f"\n❌ Failed: {name}")
+            print(f"\n❌ Failed: {ex}")
             sys.exit(1)
 
     print("\n✅ All exercises passed.")
@@ -130,6 +124,7 @@ def watch_all():
             current_idx += 1
             continue
 
+        # FIXME this is copy & paste from above
         mtime = matches[0].stat().st_mtime
         if mtimes.get(name) != mtime:
             mtimes[name] = mtime
