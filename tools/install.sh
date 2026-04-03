@@ -19,6 +19,4 @@ fi
 
 echo "[cpplings] Cloning repository..."
 git clone --recursive --branch "$BRANCH" "$REPO_URL" "$TARGET_DIR"
-
-cd "$TARGET_DIR"
-./cpplings -h
+echo "✅ Done.")
