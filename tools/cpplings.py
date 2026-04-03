@@ -48,14 +48,15 @@ def run_binary(name):
 
 
 def find_exercise(name):
-    for ex in load_exercises():
-        if ex["name"] == name:
-            return ex
+    for ex in get_targets():
+        matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
+        if len(matches) == 1:
+            return matches[0]
     return None
 
 
 def list_exercises():
-    for ex in load_exercises():
+    for ex in get_targets():
         print(ex["name"])
 
 
@@ -93,23 +94,18 @@ def watch(name):
         print(f"exercise not found: {name}")
         sys.exit(1)
 
-    path = ROOT / ex["path"]
-    if not path.exists():
-        print(f"exercise file missing: {path}")
-        sys.exit(1)
-
-    print(f"[watch] watching {name} ({path})")
+    print(f"[watch] watching {name} ({ex})")
 
     last_mtime = 0
     while True:
-        mtime = path.stat().st_mtime
+        mtime = ex.stat().st_mtime
         if mtime != last_mtime:
             last_mtime = mtime
             print("\n[watch] change detected")
 
             try:
                 cmake_build(name)
-                subprocess.check_call([str(BUILD / name)])
+                run_binary(name)
                 print("[watch] ✅ pass")
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
@@ -157,6 +153,7 @@ def usage():
     print("  cpplings run <exercise>")
     print("  cpplings verify")
     print("  cpplings watch <exercise>")
+    print("  cpplings watch-all")
     sys.exit(1)
 
 
