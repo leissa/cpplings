@@ -134,6 +134,7 @@ def watcher_thread(state):
             with state["lock"]:
                 state["mtimes"][name] = mtime
             print(f"\n[watch] change detected in {name}")
+            print(f"\n[{idx + 1}/{len(targets)}] {name}")
             try:
                 cmake_build(name)
                 run_binary(name)
@@ -142,6 +143,7 @@ def watcher_thread(state):
                     state["current_idx"] += 1
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
+                print("options: (n)ext  (p)rev  (q)uit")
 
         time.sleep(0.4)
 
@@ -165,10 +167,11 @@ def watch_all():
             if key == "n":
                 state["current_idx"] = min(idx + 1, len(targets) - 1)
             elif key == "p":
-                state["current_idx"] = max(idx - 1, 0)
-                state["mtimes"].pop(
-                    targets[state["current_idx"]], None
-                )  # force recheck
+                current = state["current_idx"]
+                prev = max(current - 1, 0)
+                state["mtimes"].pop(targets[current], None)
+                state["mtimes"].pop(targets[prev], None)
+                state["current_idx"] = prev
             elif key == "q":
                 return
 
