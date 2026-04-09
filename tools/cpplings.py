@@ -6,11 +6,11 @@ import time
 import pathlib
 import subprocess
 import os
+import threading
 from ascii import print_ascii
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
-CONFIG_FILE = ROOT / "exercises.json"
 
 
 def get_targets():
@@ -44,7 +44,7 @@ def run_binary(name):
 
 
 def find_exercise(name):
-    for ex in get_targets():
+    for _ in get_targets():
         matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
         if len(matches) == 1:
             return matches[0]
@@ -109,37 +109,68 @@ def watch(name):
         time.sleep(0.4)
 
 
-def watch_all():
-    targets = get_targets()
-    mtimes = {}  # name -> last mtime
-    print(targets)
-    current_idx = 0
+def watcher_thread(state):
+    while True:
+        with state["lock"]:
+            idx = state["current_idx"]
+            targets = state["targets"]
 
-    while current_idx < len(targets):
-        name = targets[current_idx]
-        # glob for the matching .cpp under exercises/
+        if idx >= len(targets):
+            print("\n🎉 All exercises passed!")
+            return
+
+        name = targets[idx]
         matches = list(ROOT.glob(f"exercises/**/{name}.cpp"))
         if not matches:
-            print(name + "does not match any exercise. Skipping")
-            current_idx += 1
+            with state["lock"]:
+                state["current_idx"] += 1
             continue
 
-        # FIXME this is copy & paste from above
         mtime = matches[0].stat().st_mtime
-        if mtimes.get(name) != mtime:
-            mtimes[name] = mtime
-            print("\n[watch] change detected")
+        with state["lock"]:
+            last = state["mtimes"].get(name)
 
+        if mtime != last:
+            with state["lock"]:
+                state["mtimes"][name] = mtime
+            print(f"\n[watch] change detected in {name}")
             try:
-                print(name)
                 cmake_build(name)
                 run_binary(name)
                 print("[watch] ✅ pass")
-                current_idx += 1
+                with state["lock"]:
+                    state["current_idx"] += 1
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
 
         time.sleep(0.4)
+
+
+def watch_all():
+    targets = get_targets()
+    state = {
+        "current_idx": 0,
+        "targets": targets,
+        "mtimes": {},
+        "lock": threading.Lock(),
+    }
+
+    t = threading.Thread(target=watcher_thread, args=(state,), daemon=True)
+    t.start()
+
+    while t.is_alive():
+        key = input()
+        with state["lock"]:
+            idx = state["current_idx"]
+            if key == "n":
+                state["current_idx"] = min(idx + 1, len(targets) - 1)
+            elif key == "p":
+                state["current_idx"] = max(idx - 1, 0)
+                state["mtimes"].pop(
+                    targets[state["current_idx"]], None
+                )  # force recheck
+            elif key == "q":
+                return
 
 
 def main():
@@ -172,6 +203,7 @@ def main():
         watch(args.exercise)
     elif args.cmd == "watch-all":
         watch_all()
+
 
 if __name__ == "__main__":
     main()
