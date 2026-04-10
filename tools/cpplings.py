@@ -134,7 +134,7 @@ def watcher_thread(state):
             with state["lock"]:
                 state["mtimes"][name] = mtime
             print(f"\n[watch] change detected in {name}")
-            print(f"\n[{idx + 1}/{len(targets)}] {name}")
+            print(f"\n\033[1;38;2;255;165;0m[{idx + 1}/{len(targets)}] === {name} ===\033[0m")
             try:
                 cmake_build(name)
                 run_binary(name)
