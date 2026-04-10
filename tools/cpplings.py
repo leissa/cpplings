@@ -164,16 +164,19 @@ def watch_all():
         key = input()
         with state["lock"]:
             idx = state["current_idx"]
-            if key == "n":
-                state["current_idx"] = min(idx + 1, len(targets) - 1)
-            elif key == "p":
-                current = state["current_idx"]
-                prev = max(current - 1, 0)
-                state["mtimes"].pop(targets[current], None)
-                state["mtimes"].pop(targets[prev], None)
-                state["current_idx"] = prev
-            elif key == "q":
-                return
+            match key:
+                case "n":
+                    state["current_idx"] = min(idx + 1, len(targets) - 1)
+                case "p":
+                    current = state["current_idx"]
+                    prev = max(current - 1, 0)
+                    state["mtimes"].pop(targets[current], None)
+                    state["mtimes"].pop(targets[prev], None)
+                    state["current_idx"] = prev
+                case "q":
+                    return
+                case _:
+                    continue
 
 
 def main():
@@ -196,17 +199,17 @@ def main():
 
     cmake_configure()
 
-    if args.cmd == "list":
-        list_exercises()
-    elif args.cmd == "run":
-        run_exercise(args.exercise)
-    elif args.cmd == "verify":
-        verify()
-    elif args.cmd == "watch":
-        watch(args.exercise)
-    elif args.cmd == "watch-all":
-        watch_all()
-
+    match args.cmd:
+        case "list":
+            list_exercises()
+        case "run":
+            run_exercise(args.exercise)
+        case "verify":
+            verify()
+        case "watch":
+            watch(args.exercise)
+        case "watch-all":
+            watch_all()
 
 if __name__ == "__main__":
     main()
