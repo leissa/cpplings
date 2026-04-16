@@ -7,10 +7,52 @@ import pathlib
 import subprocess
 import os
 import threading
+import json
 from ascii import print_ascii
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
+
+CACHE_FILE = BUILD / "cpplings_cache.json"
+
+
+def load_cache():
+    try:
+        data = json.loads(CACHE_FILE.read_text())
+        targets = get_targets()
+        # validate cached names still exist
+        data["skipped"] = [s for s in data.get("skipped", []) if s in targets]
+        idx = data.get("current_idx", 0)
+        data["current_idx"] = max(0, min(idx, len(targets) - 1))
+        return data
+    except:
+        return {"current_idx": 0, "skipped": []}
+
+
+def reset_state():
+    CACHE_FILE.unlink(missing_ok=True)
+    targets = get_targets()
+    cache = load_cache()
+    return init_state(cache, targets)
+
+
+def save_cache(state):
+    with state["lock"]:
+        data = {
+            "current_idx": state["current_idx"],
+            "skipped": state["skipped"],
+        }
+    CACHE_FILE.write_text(json.dumps(data))
+
+
+def init_state(cache, targets):
+    return {
+        "current_idx": cache["current_idx"],
+        "targets": targets,
+        "mtimes": {},
+        "skipped": cache["skipped"],
+        "lock": threading.Lock(),
+    }
 
 
 def get_targets():
@@ -129,12 +171,15 @@ def watcher_thread(state):
         mtime = matches[0].stat().st_mtime
         with state["lock"]:
             last = state["mtimes"].get(name)
+        save_cache(state)
 
         if mtime != last:
             with state["lock"]:
                 state["mtimes"][name] = mtime
             print(f"\n[watch] change detected in {name}")
-            print(f"\n\033[1;38;2;255;165;0m[{idx + 1}/{len(targets)}] === {name} ===\033[0m")
+            print(
+                f"\n\033[1;38;2;255;165;0m[{idx + 1}/{len(targets)}] === {name} ===\033[0m"
+            )
             try:
                 cmake_build(name)
                 run_binary(name)
@@ -143,40 +188,76 @@ def watcher_thread(state):
                     state["current_idx"] += 1
             except subprocess.CalledProcessError:
                 print("[watch] ❌ fail")
-                print("options: (n)ext  (p)rev  (q)uit")
+                print("options: (n)ext  (p)rev (g)oto <name|number> (r)eset (q)uit")
 
         time.sleep(0.4)
 
 
 def watch_all():
     targets = get_targets()
-    state = {
-        "current_idx": 0,
-        "targets": targets,
-        "mtimes": {},
-        "lock": threading.Lock(),
-    }
+    cache = load_cache()
+
+    if cache["skipped"]:
+        print(f"⚠️  Skipped exercises: {', '.join(cache['skipped'])}")
+    state = init_state(cache, targets)
 
     t = threading.Thread(target=watcher_thread, args=(state,), daemon=True)
     t.start()
 
     while t.is_alive():
-        key = input()
+        key = input().strip()
+        parts = key.split()
+
+        if not parts:
+            continue
+
         with state["lock"]:
             idx = state["current_idx"]
-            match key:
-                case "n":
+
+        match parts[0]:
+            case "n":
+                with state["lock"]:
                     state["current_idx"] = min(idx + 1, len(targets) - 1)
-                case "p":
-                    current = state["current_idx"]
-                    prev = max(current - 1, 0)
-                    state["mtimes"].pop(targets[current], None)
+                    state["skipped"].append(targets[idx])
+                    state["mtimes"].pop(targets[idx], None)
+                save_cache(state)
+            case "p":
+                with state["lock"]:
+                    prev = max(idx - 1, 0)
+                    state["mtimes"].pop(targets[idx], None)
                     state["mtimes"].pop(targets[prev], None)
                     state["current_idx"] = prev
-                case "q":
-                    return
-                case _:
+                save_cache(state)
+            case "g":
+                if len(parts) < 2:
+                    print("usage: g <name|number>")
                     continue
+                arg = parts[1]
+                try:
+                    new_idx = int(arg) - 1  # 1-based
+                    if not 0 <= new_idx < len(targets):
+                        print(f"index out of range: 1–{len(targets)}")
+                        continue
+                except ValueError:
+                    if arg not in targets:
+                        print(f"exercise not found: {arg}")
+                        continue
+                    new_idx = targets.index(arg)
+                with state["lock"]:
+                    state["mtimes"].pop(targets[new_idx], None)
+                    state["current_idx"] = new_idx
+                save_cache(state)
+
+            case "r":
+                with state["lock"]:
+                    state["current_idx"] = 0
+                    state["skipped"] = []
+                    state["mtimes"] = {}
+                save_cache(state)
+            case "q":
+                return
+            case _:
+                continue
 
 
 def main():
@@ -195,6 +276,7 @@ def main():
     watch_parser = subparsers.add_parser("watch", help="Watch a specific exercise")
     watch_parser.add_argument("exercise", help="Exercise name to watch")
     subparsers.add_parser("watch-all", help="Watch all exercises (default)")
+    subparsers.add_parser("reset", help="Reset progress")
     args = parser.parse_args()
 
     cmake_configure()
@@ -210,6 +292,10 @@ def main():
             watch(args.exercise)
         case "watch-all":
             watch_all()
+        case "reset":
+            CACHE_FILE.unlink(missing_ok=True)
+            print("✅ Progress reset.")
+
 
 if __name__ == "__main__":
     main()
