@@ -10,9 +10,9 @@
            _/        _/                            _/_/
 ```
 
-[![Standard](https://img.shields.io/badge/c%2B%2B-23-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![download](https://img.shields.io/badge/download%20%20-link-blue.svg)](https://raw.githubusercontent.com/leissa/cpplings/refs/heads/master/tools/install.sh)
+[![Standard](https://img.shields.io/badge/C%2B%2B-23-blue?style=flat-square&logo=cplusplus)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
+[![Download](https://img.shields.io/badge/↓_Download-link-blue?style=flat-square)](https://raw.githubusercontent.com/leissa/cpplings/refs/heads/master/tools/install.sh)
 
 [Rustlings](https://rustlings.rust-lang.org/)-style exercises for C++ using:
 * [CMake](https://cmake.org/)
