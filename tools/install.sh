@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="git@github.com:leissa/cpplings.git"
+REPO_URL="git@gitlab.gwdg.de:leissa/cpplings.git"
 TARGET_DIR="cpplings"
 BRANCH="master"
 
