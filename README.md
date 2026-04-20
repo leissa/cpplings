@@ -51,3 +51,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
 ```
+
+## Credits
+
+This tool follows the [*Modern C++ Programming*](https://federico-busato.github.io/Modern-CPP-Programming/) course by [Federico Busato](https://federico-busato.github.io/).
