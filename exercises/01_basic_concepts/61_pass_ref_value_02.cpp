@@ -9,3 +9,4 @@ TEST_CASE("pass by pointer") {
   int result = 0;
   sum_into(17, 25, &result);
   CHECK(result == 42);
+}
