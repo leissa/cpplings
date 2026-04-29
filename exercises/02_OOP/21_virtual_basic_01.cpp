@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-// TODO: Use the virtual functions to make the dispatch work correctly.
+// TODO: Use virtual functions to make the dispatch work correctly.
 
 struct Animal {
   const char *speak() { return "..."; }

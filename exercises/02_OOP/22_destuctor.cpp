@@ -1,17 +1,30 @@
 #include <doctest/doctest.h>
 
-// TODO: Make the Base destructor virtual so both destructors run.
-
+// TODO: Define a base class `Base` with:
+//   - A constructor that takes an int* and increments the value it points to.
+//   - A destructor that decrements the value it points to.
+//   - A virtual destructor (required for polymorphic deletion).
+//
+// TODO: Define a derived class `Derived` that inherits from `Base`:
+//   - Has a constructor taking two int* parameters: one for Base, one for
+//   extra.
+//   - Increments the second counter in the constructor.
+//   - Has a destructor that decrements the second counter.
+//   - Must override the destructor.
+//
+// Note: The destructor in Base must be virtual so that both destructors run
+//       when deleting a Derived object through a Base pointer.
+//
 struct Base {
   int *log;
-  Base(int *l) : log(l) { *log += 1; }
-  ~Base() { *log -= 1; }
+  // constructor
+  // destructor
 };
 
 struct Derived : Base {
   int *extra;
-  Derived(int *l, int *e) : Base(l), extra(e) { *extra += 1; }
-  ~Derived() { *extra -= 1; }
+  // constructor
+  // destructor
 };
 
 TEST_CASE("virtual destructor") {

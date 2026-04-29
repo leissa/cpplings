@@ -1,8 +1,11 @@
 #include <doctest/doctest.h>
 
-// TODO: Define an abstract class `Printable` with a pure virtual
-// function `to_string()` returning a const char*.
+// TODO: Define an abstract class `Printable` with:
+//  - a pure virtual function `to_string()` returning a const char*.
+//  - a virtual destructor
 // Then define two concrete classes that implement it.
+// - 'Good' that implements to_string() to return "good"
+// - 'Bad' that implements to_string() to return "bad"
 
 // TODO: define Printable, Good, and Bad here
 
