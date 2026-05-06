@@ -31,7 +31,11 @@ if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU"))
     message(FATAL_ERROR "Only Clang and GCC are supported.")
 endif()
 
-set(SAN_FLAGS "-fsanitize=address,leak,undefined")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i[3-6]86)$")
+    set(SAN_FLAGS "-fsanitize=address,undefined,leak")
+else()
+    set(SAN_FLAGS "-fsanitize=address,undefined")
+endif()
 
 file(GLOB_RECURSE EXERCISE_FILES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/exercises/*.cpp"
