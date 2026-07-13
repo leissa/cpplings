@@ -70,14 +70,14 @@ g++ -std=c++23 -O2 -I../external/doctest main.cpp -o raytrace
 
 Bundled scenes (in `scenes/`):
 
-| Scene         | Shows                                                                |
-| ------------- | -------------------------------------------------------------------- |
-| `test.txt`    | The tiny scene graded by PART 10 (a red sphere on a sky background). |
-| `example.txt` | Three spheres on a reflective floor.                                 |
-| `cornell.txt` | A Cornell box built from triangles; mirror + glossy spheres.         |
-| `pyramid.txt` | A triangle pyramid and two spheres on a reflective floor.            |
-| `spheres.txt` | Five spheres with increasing shininess/reflectivity, mirror floor.   |
-| `mirrors.txt` | Two facing mirror walls — a hall-of-mirrors effect.                  |
+| Scene         | Shows                                                                | Reference render                            |
+| ------------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| `test.txt`    | The tiny scene graded by PART 10 (a red sphere on a sky background). | ![test](../../assets/test.png)       |
+| `example.txt` | Three spheres on a reflective floor.                                 | ![example](../../assets/example.png) |
+| `cornell.txt` | A Cornell box built from triangles; mirror + glossy spheres.         | ![cornell](../../assets/cornell.png) |
+| `pyramid.txt` | A triangle pyramid and two spheres on a reflective floor.            | ![pyramid](../../assets/pyramid.png) |
+| `spheres.txt` | Five spheres with increasing shininess/reflectivity, mirror floor.   | ![spheres](../../assets/spheres.png) |
+| `mirrors.txt` | Two facing mirror walls — a hall-of-mirrors effect.                  | ![mirrors](../../assets/mirrors.png) |
 
 ## Scene description language
 
