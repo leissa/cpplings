@@ -3,13 +3,13 @@ project(cpplings LANGUAGES CXX)
 
 find_package(Git QUIET)
 
-set(DOCTEST_DIR "${CMAKE_SOURCE_DIR}/external/doctest")
+set(DOCTEST_DIR "${CMAKE_SOURCE_DIR}/submodules/doctest")
 
 if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.gitmodules")
     file(GLOB DOCTEST_CONTENTS "${DOCTEST_DIR}/*")
 
     if(NOT DOCTEST_CONTENTS)
-        message(STATUS "external/doctest is empty, updating submodules...")
+        message(STATUS "submodules/doctest is empty, updating submodules...")
         execute_process(
             COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -55,7 +55,7 @@ foreach(ex_file ${EXERCISE_FILES})
     )
     target_include_directories(
         ${ex_name}
-        PUBLIC  ${CMAKE_SOURCE_DIR}/external/doctest
+        PUBLIC  ${CMAKE_SOURCE_DIR}/submodules/doctest
         PRIVATE ${CMAKE_SOURCE_DIR}/include
     )
     target_compile_definitions(${ex_name} PRIVATE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)

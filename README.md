@@ -25,7 +25,7 @@
 ## Install
 
 ```sh
-curl -fsSL https://gitlab.gwdg.de/leissa/cpplings/-/raw/master/tools/install.sh?ref_type=heads | bash
+curl -fsSL https://raw.githubusercontent.com/leissa/cpplings/refs/heads/master/tools/install.sh | bash
 ```
 
 ## Start
