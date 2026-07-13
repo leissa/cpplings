@@ -1,0 +1,44 @@
+# A Cornell-box style room built entirely from triangles.
+# Red left wall, green right wall, white floor/ceiling/back wall,
+# two spheres inside (one matte, one mirror).
+
+size 600 600
+
+# Look into the open front of the box.
+camera  0 2 9    0 2 -1    0 1 0    45
+
+background 0.0 0.0 0.0
+ambient    0.1 0.1 0.1
+
+# Light near the ceiling.
+light  0 3.8 -1    1.0 1.0 1.0
+
+material white  0.7 0.7 0.7   0.1 0.1 0.1   16   0.0
+material red    0.7 0.1 0.1   0.1 0.1 0.1   16   0.0
+material green  0.1 0.7 0.1   0.1 0.1 0.1   16   0.0
+material glossy 0.2 0.2 0.7   1.0 1.0 1.0   64   0.2
+material mirror 0.1 0.1 0.1   1.0 1.0 1.0  256   0.85
+
+# Floor (y = 0)
+triangle -2 0 2    2 0 2    2 0 -4   white
+triangle -2 0 2    2 0 -4  -2 0 -4   white
+
+# Ceiling (y = 4)
+triangle -2 4 2    2 4 2    2 4 -4   white
+triangle -2 4 2    2 4 -4  -2 4 -4   white
+
+# Back wall (z = -4)
+triangle -2 0 -4   2 0 -4   2 4 -4   white
+triangle -2 0 -4   2 4 -4  -2 4 -4   white
+
+# Left wall (x = -2), red
+triangle -2 0 2   -2 0 -4  -2 4 -4   red
+triangle -2 0 2   -2 4 -4  -2 4 2    red
+
+# Right wall (x = 2), green
+triangle 2 0 2    2 0 -4   2 4 -4    green
+triangle 2 0 2    2 4 -4   2 4 2     green
+
+# Two spheres inside the box.
+sphere -0.9 0.9 -1.5   0.9  mirror
+sphere  1.0 0.7 -0.3   0.7  glossy

@@ -1,0 +1,33 @@
+# A colourful row of spheres on a mirror floor.
+# Good for comparing shininess and reflectivity settings side by side.
+
+size 900 500
+
+camera  0 2 8    0 0.7 0    0 1 0    45
+
+background 0.05 0.05 0.08
+ambient    0.12 0.12 0.12
+
+light  0 6 6     1.0 1.0 1.0
+light -6 4 2     0.5 0.5 0.5
+
+# A dark, highly reflective floor for nice reflections.
+material floor  0.15 0.15 0.15  0.5 0.5 0.5   64   0.6
+
+# Same colour, increasing shininess left to right.
+material matte  0.8 0.3 0.3   0.3 0.3 0.3    4   0.0
+material soft   0.3 0.8 0.3   0.6 0.6 0.6   16   0.0
+material shiny  0.3 0.3 0.8   1.0 1.0 1.0   64   0.1
+material metal  0.7 0.6 0.2   1.0 1.0 1.0  128   0.4
+material mirror 0.1 0.1 0.1   1.0 1.0 1.0  256   0.9
+
+# Mirror floor (y = 0)
+triangle -8 0 -8    8 0 -8    8 0 8   floor
+triangle -8 0 -8    8 0  8   -8 0 8   floor
+
+# Five spheres in a row.
+sphere -4 0.7 0   0.7  matte
+sphere -2 0.7 0   0.7  soft
+sphere  0 0.7 0   0.7  shiny
+sphere  2 0.7 0   0.7  metal
+sphere  4 0.7 0   0.7  mirror
