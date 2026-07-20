@@ -14,10 +14,10 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 [![Download](https://img.shields.io/badge/↓_Download-link-blue?style=flat-square)](https://raw.githubusercontent.com/leissa/cpplings/refs/heads/master/tools/install.sh)
 
-[Rustlings](https://rustlings.rust-lang.org/)-style exercises for C++ using:
-* [CMake](https://cmake.org/)
-* [doctest](https://github.com/doctest/doctest)
-* Sanitizers by default:
+[Rustlings](https://rustlings.rust-lang.org/)-style exercises for learning modern C++, built on:
+* [CMake](https://cmake.org/) for building
+* [doctest](https://github.com/doctest/doctest) for testing
+* Sanitizers enabled by default:
     * [Address Sanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
     * [Leak Sanitizer](https://clang.llvm.org/docs/LeakSanitizer.html)
     * [Undefined Behavior Sanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
@@ -34,6 +34,9 @@ curl -fsSL https://raw.githubusercontent.com/leissa/cpplings/refs/heads/master/t
 cd cpplings
 ./cpplings
 ```
+
+This walks you through the exercises one by one, watching your files for
+changes and re-running them as you fix each one.
 
 ## Usage
 
